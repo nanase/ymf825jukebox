@@ -32,6 +32,5 @@ void delay_sleep(Delay* delay, double seconds) {
 
   delay->diff_prev = target_time - get_time();
   delay->current_time = target_time;
-  
 }
 

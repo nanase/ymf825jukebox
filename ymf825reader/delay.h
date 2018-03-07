@@ -1,7 +1,7 @@
 #pragma once
 #include <stdint.h>
 
-#define SLEEP_PRECISION 0.001
+#define SLEEP_PRECISION 0.0001
 
 typedef struct {
   double diff_prev;

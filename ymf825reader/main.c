@@ -68,11 +68,9 @@ void play(Ymf825* ymf825, const uint8_t* file, int file_size) {
 
     switch (command) {
       case 0x00:
-        //printf("[N]\n");
         break;
 
       case 0x01:
-        //printf("[W] address: %2x, data: %2x\n", file[index + 0], file[index + 1]);
         ymf825_write(ymf825, file[index + 0], file[index + 1]);
         index += 2;
         break;
@@ -81,23 +79,19 @@ void play(Ymf825* ymf825, const uint8_t* file, int file_size) {
         address = file[index++];
         length = (size_t)read_uint16_t(file + index);
         index += 2;
-        //printf("[B] address: %2x, length: %d\n", address, length);
         ymf825_burst_write(ymf825, address, file + index, length);
         index += length;
         break;
 
       case 0x80:
-        //printf("[C] chip: %d\n", file[index]);
         ymf825_change_target_chip(ymf825, file[index++]);
         break;
 
       case 0xf0:
-        //printf("[R]\n");
         ymf825_reset_hardware(ymf825);
         break;
 
       case 0xf8:
-        //printf("[F]\n");
         ymf825_flush(ymf825);
         break;
 
