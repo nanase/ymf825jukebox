@@ -7,6 +7,7 @@
 #include "ftd2xx.h"
 #include "common.h"
 #include "ymf825.h"
+#include "delay.h"
 
 uint16_t read_uint16_t(const uint8_t* buffer) {
   uint16_t value;
@@ -35,7 +36,7 @@ uint8_t* read_all(const char* filepath, int* file_size) {
   uint8_t* buffer;
   struct stat st;
 
-  if ((fp = fopen(filepath, "rb"))) == NULL) {
+  if ((fp = fopen(filepath, "rb")) == NULL) {
     printf("invalid file path '%s'\n", filepath);
     exit(1);
   }
@@ -53,7 +54,7 @@ uint8_t* read_all(const char* filepath, int* file_size) {
 void play(Ymf825* ymf825, const uint8_t* file, int file_size) {
   uint8_t  command, address;
   size_t   length;
-  uint16_t wait_time;
+  uint16_t wait_tick;
 
   int      index;
   uint16_t resolution = check_header(file);
@@ -101,16 +102,23 @@ void play(Ymf825* ymf825, const uint8_t* file, int file_size) {
         break;
 
       case 0xfd:
-      case 0xfe:
-        wait_time = read_uint16_t(file + index);
+        wait_tick = read_uint16_t(file + index) + 1;
         index += 2;
-        //printf("[W] wait: %d ms\n", (int)round((tick_time * wait_time) * 1000.0));
-        msleep((int)round((tick_time * wait_time) * 1000.0));
+        delay_sleep(&ymf825->delay, tick_time * wait_tick);
+        break;
+
+      case 0xfe:
+        wait_tick = read_uint16_t(file + index) + 1;
+        index += 2;
+        while (wait_tick > 10) {
+          delay_sleep(&ymf825->delay, tick_time * 10);
+          wait_tick -= 10;
+        }
+        delay_sleep(&ymf825->delay, tick_time * wait_tick);
         break;
 
       case 0xff:
-        //printf("[O]\n");
-        msleep((int)round(tick_time * 1000.0));
+        delay_sleep(&ymf825->delay, tick_time);
         break;
 
       default:
@@ -137,5 +145,6 @@ int main(int argc, const char** argv) {
   ymf825_close(&ymf825);
 
   free(buffer);
+
   return 0;
 }

@@ -1,12 +1,14 @@
 #pragma once
 #include <stdint.h>
 #include "spi.h"
+#include "delay.h"
 
 #define DEFAULT_DEVICE    0
 #define YMF825_CS_PIN     0x18
 
 typedef struct {
-  Spi  spi;
+  Spi   spi;
+  Delay delay;
 } Ymf825;
 
 void ymf825_create(Ymf825*, int, uint8_t);

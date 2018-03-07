@@ -1,8 +1,8 @@
 PROGRAM = ymf825
-OBJS = main.o common.o spi.o ymf825.o
+OBJS = main.o common.o spi.o delay.o ymf825.o
 CC = gcc
 CFLAGS = -Wall
-FLAGS = -L. -lftd2xx -lm -Wl,-rpath /usr/local/lib
+FLAGS = -L. -lftd2xx -lm -Wl,-rpath /usr/local/lib -O3
 
 .PHONY: all
 all: $(PROGRAM)
