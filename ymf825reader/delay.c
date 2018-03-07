@@ -3,15 +3,16 @@
 #include <unistd.h>
 #include "delay.h"
 
-double get_time() {
-  static struct timespec tp;
-  clock_gettime(CLOCK_MONOTONIC, &tp);
-  return tp.tv_sec + tp.tv_nsec * 1.0e-9;
+static uint64_t get_time() {
+  static struct timespec tp_get_time;
+  //clock_gettime(CLOCK_MONOTONIC, &tp_get_time);
+  clock_gettime(CLOCK_REALTIME, &tp_get_time);
+  return tp_get_time.tv_sec * 1e9 + tp_get_time.tv_nsec;
 }
 
 void delay_create(Delay* delay) {
   delay->diff_prev = 0.0;
-  delay->current_time = get_time();
+  delay->current_time = get_time() * 1.0e-9;
   delay->real_time = delay->current_time;
 }
 
@@ -22,7 +23,7 @@ void delay_sleep(Delay* delay, double seconds) {
   //nanosleep(&tp, NULL);
   
   double target_time = delay->current_time + seconds;
-  double sleep_target_time = target_time - delay->diff_prev - SLEEP_PRECISION;
+  uint64_t sleep_target_time = (uint64_t)((target_time - delay->diff_prev - SLEEP_PRECISION) * 1e9);
 
   tp.tv_sec = 0;
   tp.tv_nsec = SLEEP_PRECISION * 1000000000;
@@ -30,7 +31,7 @@ void delay_sleep(Delay* delay, double seconds) {
   while (sleep_target_time > get_time())
     nanosleep(&tp, NULL);
 
-  delay->diff_prev = target_time - get_time();
+  delay->diff_prev = target_time - get_time() * 1.0e-9;
   delay->current_time = target_time;
 }
 
