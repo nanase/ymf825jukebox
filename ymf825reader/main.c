@@ -55,13 +55,7 @@ void play(Ymf825* ymf825, const uint8_t* file, int file_size) {
   uint8_t  command, address;
   size_t   length;
   uint16_t wait_tick;
-
   int      index;
-  uint16_t resolution = check_header(file);
-  double   tick_time = 1.0 / (resolution + 1);
-
-  printf("file size: %d\n", file_size);
-  printf("resolution: %d\n", resolution + 1);
 
   for (index = 0x10; index < file_size;) {
     command = file[index++];
@@ -98,21 +92,17 @@ void play(Ymf825* ymf825, const uint8_t* file, int file_size) {
       case 0xfd:
         wait_tick = read_uint16_t(file + index) + 1;
         index += 2;
-        delay_sleep(&ymf825->delay, tick_time * wait_tick);
+        delay_sleep(&ymf825->delay, wait_tick);
         break;
 
       case 0xfe:
         wait_tick = read_uint16_t(file + index) + 1;
         index += 2;
-        while (wait_tick > 10) {
-          delay_sleep(&ymf825->delay, tick_time * 10);
-          wait_tick -= 10;
-        }
-        delay_sleep(&ymf825->delay, tick_time * wait_tick);
+        delay_sleep(&ymf825->delay, wait_tick);
         break;
 
       case 0xff:
-        delay_sleep(&ymf825->delay, tick_time);
+        delay_sleep(&ymf825->delay, 1);
         break;
 
       default:
@@ -127,6 +117,7 @@ int main(int argc, const char** argv) {
   uint8_t* buffer;
   int      file_size;
   Ymf825   ymf825;
+  uint16_t resolution;
 
   if (argc < 1) {
     printf("input file is not specified\n");
@@ -134,7 +125,12 @@ int main(int argc, const char** argv) {
   }
 
   buffer = read_all(argv[1], &file_size);
-  ymf825_create(&ymf825, DEFAULT_DEVICE, YMF825_CS_PIN);
+  resolution = check_header(buffer);
+
+  printf("file size: %d\n", file_size);
+  printf("resolution: %d\n", resolution + 1);
+
+  ymf825_create(&ymf825, DEFAULT_DEVICE, YMF825_CS_PIN, resolution);
   play(&ymf825, buffer, file_size);
   ymf825_close(&ymf825);
 

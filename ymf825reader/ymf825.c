@@ -24,13 +24,13 @@ void ymf825spi_reset_hardware(Spi* spi) {
 
 // ----------------------------------------------------------------
 
-void ymf825_create(Ymf825* ymf825, int device_num, uint8_t pin) {
+void ymf825_create(Ymf825* ymf825, int device_num, uint8_t pin, uint16_t resolution) {
   FT_HANDLE ftHandle;
 
   check_status(FT_Open(device_num, &ftHandle));
   printf("device %d opened\n", device_num);
-  spi_create(&(ymf825->spi), ftHandle, false, pin);
-  delay_create(&(ymf825->delay));
+  spi_create(&ymf825->spi, ftHandle, false, pin);
+  delay_create(&ymf825->delay, resolution);
   spi_set_cs_target_pin(&ymf825->spi, pin);
 }
 

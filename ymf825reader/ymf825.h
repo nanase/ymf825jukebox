@@ -11,7 +11,7 @@ typedef struct {
   Delay delay;
 } Ymf825;
 
-void ymf825_create(Ymf825*, int, uint8_t);
+void ymf825_create(Ymf825*, int, uint8_t, uint16_t);
 void ymf825_flush(Ymf825*);
 void ymf825_write(Ymf825*, uint8_t, uint8_t);
 void ymf825_burst_write(Ymf825*, uint8_t, const uint8_t*, size_t);

@@ -1,13 +1,14 @@
 #pragma once
 #include <stdint.h>
 
-#define SLEEP_PRECISION 0.0001
+// nanoseconds
+#define SLEEP_PRECISION 100000
 
 typedef struct {
-  double diff_prev;
-  double current_time;
-  double real_time;
+  uint64_t diff_prev;
+  uint64_t current_time;
+  uint64_t tick_unit;
 } Delay;
 
-void delay_create(Delay*);
-void delay_sleep(Delay*, double);
+void delay_create(Delay*, uint16_t);
+void delay_sleep(Delay*, uint16_t);
