@@ -27,7 +27,7 @@ int check_header(const uint8_t* header) {
   return read_uint16_t(header + 8);
 }
 
-uint8_t* read_all(const char* filepath, int* file_size) {
+uint8_t* read_all(const char* filepath, int64_t* file_size) {
   FILE *fp;
   uint8_t* buffer;
   struct stat st;
@@ -47,11 +47,11 @@ uint8_t* read_all(const char* filepath, int* file_size) {
   return buffer;
 }
 
-void play(Ymf825* ymf825, const uint8_t* file, int file_size) {
+void play(Ymf825* ymf825, const uint8_t* file, int64_t file_size) {
   uint8_t  command, address;
   size_t   length;
   uint16_t wait_tick;
-  int      index;
+  int64_t  index;
 
   for (index = 0x10; index < file_size;) {
     command = file[index++];
@@ -111,9 +111,9 @@ void play(Ymf825* ymf825, const uint8_t* file, int file_size) {
 
 int main(int argc, const char** argv) {
   uint8_t* buffer;
-  int      file_size;
-  Ymf825   ymf825;
+  int64_t  file_size;
   uint16_t resolution;
+  Ymf825   ymf825;
 
   if (argc < 1) {
     printf("input file is not specified\n");
@@ -123,7 +123,7 @@ int main(int argc, const char** argv) {
   buffer = read_all(argv[1], &file_size);
   resolution = check_header(buffer);
 
-  printf("file size: %d\n", file_size);
+  printf("file size: %lld\n", file_size);
   printf("resolution: %d\n", resolution + 1);
 
   ymf825_create(&ymf825, DEFAULT_DEVICE, YMF825_CS_PIN, resolution);
