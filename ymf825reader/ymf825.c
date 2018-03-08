@@ -31,6 +31,8 @@ void ymf825spi_reset_hardware(Spi* spi) {
 
 // ----------------------------------------------------------------
 
+volatile bool request_stop = false;
+
 void ymf825_create(Ymf825* ymf825, int device_num, uint8_t pin, uint16_t resolution) {
   FT_HANDLE ftHandle;
 
@@ -151,4 +153,10 @@ void ymf825_play(Ymf825* ymf825, const uint8_t* file, int64_t file_size) {
     }
   }
 
+  if (request_stop)
+    ymf825_reset_hardware(ymf825);
+}
+
+void ymf825_stop() {
+  request_stop = true;
 }

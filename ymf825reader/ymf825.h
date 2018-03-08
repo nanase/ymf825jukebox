@@ -20,3 +20,4 @@ void ymf825_close(Ymf825*);
 void ymf825_reset_hardware(Ymf825*);
 uint16_t ymf825_check_header(const uint8_t*);
 void ymf825_play(Ymf825*, const uint8_t*, int64_t);
+void ymf825_stop();

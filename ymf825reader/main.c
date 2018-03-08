@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <signal.h>
 #include <sys/stat.h>
 
 #include "ftd2xx.h"
@@ -29,6 +30,8 @@ uint8_t* read_all(const char* filepath, int64_t* file_size) {
   return buffer;
 }
 
+void sigint_handler(int signame) {
+  ymf825_stop(&ymf825);
 }
 
 int main(int argc, const char** argv) {
@@ -41,6 +44,7 @@ int main(int argc, const char** argv) {
     return 1;
   }
 
+  signal(SIGINT, sigint_handler);
   buffer = read_all(argv[1], &file_size);
   resolution = ymf825_check_header(buffer);
 
