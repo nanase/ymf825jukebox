@@ -10,11 +10,7 @@
 #include "delay.h"
 
 uint16_t read_uint16_t(const uint8_t* buffer) {
-  uint16_t value;
-  uint8_t* p = (uint8_t*)&value;
-  p[0] = buffer[0];
-  p[1] = buffer[1];
-  return value;
+  return *((uint16_t*)buffer);
 }
 
 int check_header(const uint8_t* header) {
