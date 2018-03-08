@@ -1,7 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "ftd2xx.h"
 #include "ymf825.h"
+
+static uint16_t read_uint16_t(const uint8_t* buffer) {
+  return *((uint16_t*)buffer);
+}
+
+// ----------------------------------------------------------------
 
 void ymf825spi_reset_hardware(Spi* spi) {
   static const uint8_t enable_buffer[3]  = { 0x82, 0xff, 0xff };
@@ -67,4 +74,81 @@ void ymf825_close(Ymf825* ymf825) {
 
 void ymf825_reset_hardware(Ymf825* ymf825) {
   ymf825spi_reset_hardware(&ymf825->spi);
+}
+
+uint16_t ymf825_check_header(const uint8_t* header) {
+  if (memcmp("YMF825", header, 6) != 0) {
+    printf("the file is not YMF825 dump file\n");
+    exit(1);
+  }
+
+  if (header[6] != 0 || header[7] != 0) {
+    printf("invalid YMF825 dump file\n");
+    exit(1);
+  }
+
+  return read_uint16_t(header + 8);
+}
+
+void ymf825_play(Ymf825* ymf825, const uint8_t* file, int64_t file_size) {
+  uint8_t  command, address;
+  size_t   length;
+  uint16_t wait_tick;
+  int64_t  index = 0x10;
+
+  while (!request_stop && index < file_size) {
+    command = file[index++];
+
+    switch (command) {
+      case 0x00:
+        break;
+
+      case 0x01:
+        ymf825_write(ymf825, file[index + 0], file[index + 1]);
+        index += 2;
+        break;
+
+      case 0x02:
+        address = file[index++];
+        length = (size_t)read_uint16_t(file + index);
+        index += 2;
+        ymf825_burst_write(ymf825, address, file + index, length);
+        index += length;
+        break;
+
+      case 0x80:
+        ymf825_change_target_chip(ymf825, file[index++]);
+        break;
+
+      case 0xf0:
+        ymf825_reset_hardware(ymf825);
+        break;
+
+      case 0xf8:
+        ymf825_flush(ymf825);
+        break;
+
+      case 0xfd:
+        wait_tick = read_uint16_t(file + index) + 1;
+        index += 2;
+        delay_sleep(&ymf825->delay, wait_tick);
+        break;
+
+      case 0xfe:
+        wait_tick = read_uint16_t(file + index) + 1;
+        index += 2;
+        delay_sleep(&ymf825->delay, wait_tick);
+        break;
+
+      case 0xff:
+        delay_sleep(&ymf825->delay, 1);
+        break;
+
+      default:
+        printf("invalid command %2x\n", command);
+        exit(1);
+        break;
+    }
+  }
+
 }
