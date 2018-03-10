@@ -197,7 +197,7 @@ void ymf825_play(Ymf825* ymf825, const uint8_t* file, int64_t file_size) {
         break;
 
       default:
-        printf("invalid command %2x\n", command);
+        printf("invalid command 0x%2x (in index 0x%2llx)\n", command, index - 1);
         exit(1);
         break;
     }
