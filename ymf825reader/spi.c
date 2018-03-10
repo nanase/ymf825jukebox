@@ -35,25 +35,53 @@ void spi_flush(Spi* spi) {
 }
 
 void spi_write(Spi* spi, uint8_t address, uint8_t data) {
-  uint8_t buffer[5] = { 0x11, 0x01, 0x00, address, data };
+  static uint8_t buffer[5] = { 0x11, 0x01, 0x00, 0x00, 0x00 };
 
   if (spi->cs_target_pin == 0) {
     printf("not specified cs target pin\n");
     exit(1);
   }
+
+  buffer[3] = address;
+  buffer[4] = data;
 
   spi_queue_buffer_cs_enable(spi);
   spi_queue_buffer(spi, buffer, sizeof(buffer));
   spi_queue_buffer_cs_disable(spi);
 }
 
+void spi_write_multiple(Spi* spi, const uint8_t* address_data, size_t length, bool flush) {
+  size_t i;
+  static uint8_t buffer[5] = { 0x11, 0x01, 0x00, 0x00, 0x00 };
+ 
+  if (spi->cs_target_pin == 0) {
+    printf("not specified cs target pin\n");
+    exit(1);
+  }
+
+  for (i = 0; i < length; i += 2) {
+    spi_queue_buffer_cs_enable(spi);
+    buffer[3] = address_data[i + 0];
+    buffer[4] = address_data[i + 1];
+    spi_queue_buffer(spi, buffer, sizeof(buffer));
+    spi_queue_buffer_cs_disable(spi);
+ }
+
+  if (flush)
+    spi_flush(spi);
+}
+
 void spi_burst_write(Spi* spi, uint8_t address, const uint8_t* data, size_t length) {
-  uint8_t buffer[4] = { 0x11, length & 0xff, length >> 8, address };
+  static uint8_t buffer[4] = { 0x11, 0x00, 0x00, 0x00 };
 
   if (spi->cs_target_pin == 0) {
     printf("not specified cs target pin\n");
     exit(1);
   }
+
+  buffer[1] = length & 0xff;
+  buffer[2] = length >> 8;
+  buffer[3] = address;
 
   spi_queue_buffer_cs_enable(spi);
   spi_queue_buffer(spi, buffer, sizeof(buffer));

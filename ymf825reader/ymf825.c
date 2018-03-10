@@ -56,6 +56,10 @@ void ymf825_write(Ymf825* ymf825, uint8_t address, uint8_t data) {
   spi_write(&ymf825->spi, address, data);
 }
 
+void ymf825_write_multiple(Ymf825* ymf825, const uint8_t* address_data, size_t length, bool flush) {
+  spi_write_multiple(&ymf825->spi, address_data, length, flush);
+}
+
 void ymf825_burst_write(Ymf825* ymf825, uint8_t address, const uint8_t* data, size_t length) {
   if (address >= 0x80) {
     printf("invalid address %d\n", address);
@@ -102,15 +106,56 @@ void ymf825_play(Ymf825* ymf825, const uint8_t* file, int64_t file_size) {
     command = file[index++];
 
     switch (command) {
+      // Noop
       case 0x00:
         break;
 
-      case 0x01:
+      // Write
+      case 0x10:
         ymf825_write(ymf825, file[index + 0], file[index + 1]);
         index += 2;
         break;
 
-      case 0x02:
+      // Write short
+      case 0x12:
+        length = file[index++] * 2;
+        ymf825_write_multiple(ymf825, file + index, length, false);
+        index += length;
+        break;
+      
+      // Write long
+      case 0x13:
+        length = (size_t)read_uint16_t(file + index) * 2;
+        index += 2;
+        ymf825_write_multiple(ymf825, file + index, length, false);
+        index += length;
+        break;
+
+      // Write and flush short
+      case 0x14:
+        length = file[index++] * 2;
+        ymf825_write_multiple(ymf825, file + index, length, true);
+        index += length;
+        break;
+
+      // Write and flush long
+      case 0x15:
+        length = (size_t)read_uint16_t(file + index) * 2;
+        index += 2;
+        ymf825_write_multiple(ymf825, file + index, length, true);
+        index += length;
+        break;
+
+      // BurstWrite short
+      case 0x20:
+        address = file[index++];
+        length = file[index++];
+        ymf825_burst_write(ymf825, address, file + index, length);
+        index += length;
+        break;
+
+      // BurstWrite long
+      case 0x21:
         address = file[index++];
         length = (size_t)read_uint16_t(file + index);
         index += 2;
@@ -118,32 +163,37 @@ void ymf825_play(Ymf825* ymf825, const uint8_t* file, int64_t file_size) {
         index += length;
         break;
 
+      // Flush
       case 0x80:
-        ymf825_change_target_chip(ymf825, file[index++]);
-        break;
-
-      case 0xf0:
-        ymf825_reset_hardware(ymf825);
-        break;
-
-      case 0xf8:
         ymf825_flush(ymf825);
         break;
 
-      case 0xfd:
-        wait_tick = read_uint16_t(file + index) + 1;
-        index += 2;
-        delay_sleep(&ymf825->delay, wait_tick);
+      // Change Target
+      case 0x90:
+        ymf825_change_target_chip(ymf825, file[index++]);
         break;
 
+      // Reset Hardware
+      case 0xe0:
+        printf("Reset Hardware\n");
+        ymf825_reset_hardware(ymf825);
+        break;
+
+      // Realtime Wait short
+      // Wait short
+      case 0xfc:
       case 0xfe:
-        wait_tick = read_uint16_t(file + index) + 1;
-        index += 2;
+        wait_tick = file[index++] + 1;
         delay_sleep(&ymf825->delay, wait_tick);
         break;
 
+      // Realtime Wait long
+      // Wait long
+      case 0xfd:
       case 0xff:
-        delay_sleep(&ymf825->delay, 1);
+        wait_tick = read_uint16_t(file + index) + 1;
+        index += 2;
+        delay_sleep(&ymf825->delay, wait_tick);
         break;
 
       default:

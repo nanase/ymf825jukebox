@@ -22,6 +22,7 @@ void spi_set_cs_target_pin(Spi*, uint8_t);
 void spi_flush(Spi*);
 void spi_write(Spi*, uint8_t, uint8_t);
 void spi_burst_write(Spi*, uint8_t, const uint8_t*, size_t);
+void spi_write_multiple(Spi*, const uint8_t*, size_t, bool);
 void spi_send_buffer(Spi*);
 void spi_queue_buffer(Spi*, const uint8_t*, size_t);
 void spi_queue_buffer_single(Spi*, uint8_t);
