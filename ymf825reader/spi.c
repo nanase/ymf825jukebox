@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "spi.h"
 
 void check_status(FT_STATUS status) {
@@ -71,9 +72,8 @@ void spi_send_buffer(Spi* spi) {
 }
 
 void spi_queue_buffer(Spi* spi, const uint8_t* buffer, size_t length) {
-  int i;
-  for (i = 0; i < length; i++)
-    spi->write_buffer[spi->write_buffer_index++] = buffer[i];
+  memcpy(spi->write_buffer + spi->write_buffer_index, buffer, length);
+  spi->write_buffer_index += length;
 }
 
 void spi_queue_buffer_single(Spi* spi, uint8_t data) {
