@@ -11,4 +11,4 @@ typedef struct {
 } Delay;
 
 void delay_create(Delay*, uint16_t);
-void delay_sleep(Delay*, uint16_t);
+void delay_sleep(Delay*, uint32_t);

@@ -21,7 +21,7 @@ void delay_create(Delay* delay, uint16_t resolution) {
   tp.tv_nsec = SLEEP_PRECISION;
 }
 
-void delay_sleep(Delay* delay, uint16_t wait_tick) {
+void delay_sleep(Delay* delay, uint32_t wait_tick) {
   uint64_t target_time = delay->current_time + wait_tick * delay->tick_unit;
   uint64_t sleep_target_time = target_time - delay->diff_prev - SLEEP_PRECISION;
 
