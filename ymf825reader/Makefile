@@ -2,13 +2,13 @@ PROGRAM = ymf825
 OBJS = main.o common.o spi.o delay.o ymf825.o
 CC = gcc
 CFLAGS = -Wall
-FLAGS = -L. -lftd2xx -lm -Wl,-rpath /usr/local/lib -O3
+FLAGS = -lbcm2835 -lm -O3
 
 .PHONY: all
 all: $(PROGRAM)
 
 $(PROGRAM): $(OBJS)
-	$(CC) $(FLAGS) -o $(PROGRAM) $^
+	$(CC) -o $(PROGRAM) $^ $(FLAGS) 
 
 .c.o:
 	$(CC) $< $(CFLAGS) -c

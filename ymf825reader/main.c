@@ -8,8 +8,6 @@
 #include "ymf825.h"
 #include "delay.h"
 
-Ymf825 ymf825;
-
 uint8_t* read_all(const char* filepath, int64_t* file_size) {
   FILE *fp;
   uint8_t* buffer;
@@ -31,7 +29,7 @@ uint8_t* read_all(const char* filepath, int64_t* file_size) {
 }
 
 void sigint_handler(int signame) {
-  ymf825_stop(&ymf825);
+  ymf825_stop();
 }
 
 int main(int argc, const char** argv) {
@@ -51,9 +49,9 @@ int main(int argc, const char** argv) {
   printf("file size: %lld\n", file_size);
   printf("resolution: %d\n", resolution + 1);
 
-  ymf825_create(&ymf825, DEFAULT_DEVICE, YMF825_CS_PIN, resolution);
-  ymf825_play(&ymf825, buffer, file_size);
-  ymf825_close(&ymf825);
+  ymf825_create();
+  ymf825_play(buffer, file_size, resolution);
+  ymf825_close();
 
   free(buffer);
 
