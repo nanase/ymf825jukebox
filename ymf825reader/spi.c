@@ -16,7 +16,7 @@ static void spi_initialize() {
   bcm2835_gpio_fsel(IC_PIN, BCM2835_GPIO_FSEL_OUTP);
 }
 
-void spi_create() {
+void spi_open() {
   if (!bcm2835_init()) {
     printf("failed to initialize bcm2835\n");
     exit(1);
@@ -74,7 +74,7 @@ void spi_set_ic(bool value) {
   bcm2835_gpio_write(IC_PIN, value ? LOW : HIGH);
 }
 
-void spi_destroy() {
+void spi_close() {
   bcm2835_spi_end();
   bcm2835_close();
 }

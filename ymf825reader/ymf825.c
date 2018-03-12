@@ -24,7 +24,7 @@ void ymf825spi_reset_hardware() {
 volatile bool request_stop = false;
 
 void ymf825_open() {
-  spi_create();
+  spi_open();
 }
 
 void ymf825_write(uint8_t pin, uint8_t address, uint8_t data) {
@@ -50,7 +50,7 @@ void ymf825_burst_write(uint8_t pin, uint8_t address, const uint8_t* data, size_
 }
 
 void ymf825_close() {
-  spi_destroy();
+  spi_close();
 }
 
 void ymf825_reset_hardware() {
