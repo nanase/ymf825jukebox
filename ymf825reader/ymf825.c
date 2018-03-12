@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "ftd2xx.h"
 #include "ymf825.h"
 
 static uint16_t read_uint16_t(const uint8_t* buffer) {
