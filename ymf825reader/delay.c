@@ -5,9 +5,9 @@
 #include "delay.h"
 
 static struct timespec tp;
-static struct timespec tp_get_time;
 
 static uint64_t get_time() {
+  static struct timespec tp_get_time;
   clock_gettime(CLOCK_MONOTONIC, &tp_get_time);
   return tp_get_time.tv_sec * 1e9 + tp_get_time.tv_nsec;
 }
