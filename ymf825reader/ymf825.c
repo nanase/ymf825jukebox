@@ -79,7 +79,7 @@ void ymf825_play(const uint8_t* file, int64_t file_size, uint16_t resolution) {
   int64_t  index = 0x10;
   uint8_t  pin = 0x03;
 
-  delay_create(&delay, resolution);
+  delay_initialize(&delay, resolution);
 
   while (!request_stop && index < file_size) {
     command = file[index++];

@@ -12,7 +12,7 @@ static uint64_t get_time() {
   return tp_get_time.tv_sec * 1e9 + tp_get_time.tv_nsec;
 }
 
-void delay_create(Delay* delay, uint16_t resolution) {
+void delay_initialize(Delay* delay, uint16_t resolution) {
   delay->diff_prev = 0;
   delay->current_time = get_time();
   delay->tick_unit = (uint64_t)round(1.0e9 / resolution);
