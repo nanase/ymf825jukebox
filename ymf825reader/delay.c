@@ -31,4 +31,3 @@ void delay_sleep(Delay* delay, uint32_t wait_tick) {
   delay->diff_prev = target_time - get_time();
   delay->current_time = target_time;
 }
-
