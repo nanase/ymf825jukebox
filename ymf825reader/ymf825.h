@@ -3,7 +3,7 @@
 #include "spi.h"
 #include "delay.h"
 
-void ymf825_create();
+void ymf825_open();
 void ymf825_write(uint8_t, uint8_t, uint8_t);
 void ymf825_write_multiple(uint8_t, const uint8_t*, size_t);
 void ymf825_burst_write(uint8_t, uint8_t, const uint8_t*, size_t);

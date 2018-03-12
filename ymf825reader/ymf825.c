@@ -23,7 +23,7 @@ void ymf825spi_reset_hardware() {
 
 volatile bool request_stop = false;
 
-void ymf825_create() {
+void ymf825_open() {
   spi_create();
 }
 

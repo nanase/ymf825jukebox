@@ -48,7 +48,7 @@ int main(int argc, const char** argv) {
   printf("file size: %lld\n", file_size);
   printf("resolution: %d\n", resolution + 1);
 
-  ymf825_create();
+  ymf825_open();
   ymf825_play(buffer, file_size, resolution);
   ymf825_close();
 
