@@ -2,7 +2,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <bcm2835.h>
-#include "common.h"
 
 #define READ_BUFFER_SIZE  16
 #define WRITE_BUFFER_SIZE 1024

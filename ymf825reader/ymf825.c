@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "ymf825.h"
 
 static uint16_t read_uint16_t(const uint8_t* buffer) {
@@ -10,11 +11,15 @@ static uint16_t read_uint16_t(const uint8_t* buffer) {
 // ----------------------------------------------------------------
 
 void ymf825spi_reset_hardware() {
+  static struct timespec ts;
+  ts.tv_sec = 0;
+  ts.tv_nsec = 2000000;
+
   spi_set_ic(false);
-  msleep(2);
+  nanosleep(&ts, NULL);
 
   spi_set_ic(true);
-  msleep(2);
+  nanosleep(&ts, NULL);
 
   spi_set_ic(false);
 }

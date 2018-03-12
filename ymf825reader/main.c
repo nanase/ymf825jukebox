@@ -3,7 +3,6 @@
 #include <signal.h>
 #include <sys/stat.h>
 
-#include "common.h"
 #include "ymf825.h"
 #include "delay.h"
 

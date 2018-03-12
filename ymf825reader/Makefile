@@ -1,5 +1,5 @@
 PROGRAM = ymf825
-OBJS = main.o common.o spi.o delay.o ymf825.o
+OBJS = main.o spi.o delay.o ymf825.o
 CC = gcc
 CFLAGS = -Wall
 FLAGS = -lbcm2835 -lm -O3
