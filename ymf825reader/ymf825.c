@@ -62,26 +62,12 @@ void ymf825_reset_hardware() {
   ymf825spi_reset_hardware();
 }
 
-uint16_t ymf825_check_header(const uint8_t* header) {
-  if (memcmp("YMF825", header, 6) != 0) {
-    printf("the file is not YMF825 dump file\n");
-    exit(1);
-  }
-
-  if (header[6] != 0 || header[7] != 0) {
-    printf("invalid YMF825 dump file\n");
-    exit(1);
-  }
-
-  return read_uint16_t(header + 8);
-}
-
 void ymf825_play(const uint8_t* file, int64_t file_size, uint16_t resolution) {
   Delay    delay;
   uint8_t  command, address;
   size_t   length;
   uint16_t wait_tick;
-  int64_t  index = 0x10;
+  int64_t  index = 0x00;
   uint8_t  pin = 0x03;
 
   delay_initialize(&delay, resolution);

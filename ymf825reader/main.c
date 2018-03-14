@@ -1,27 +1,38 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
-#include <sys/stat.h>
 
 #include "ymf825.h"
 #include "delay.h"
 
-uint8_t* read_all(const char* filepath, int64_t* file_size) {
-  FILE *fp;
-  uint8_t* buffer;
-  struct stat st;
+#define READ_UNIT_SIZE 65536
 
-  if ((fp = fopen(filepath, "rb")) == NULL) {
-    printf("invalid file path '%s'\n", filepath);
+uint8_t* read_all(int64_t* read_size) {
+  uint8_t* buffer;
+  size_t   buffer_size = READ_UNIT_SIZE;
+  size_t   size;
+
+  buffer = (uint8_t*)malloc(sizeof(uint8_t) * buffer_size);
+  *read_size = 0;
+
+  do {
+    size = fread(buffer + *read_size, sizeof(uint8_t), READ_UNIT_SIZE, stdin);
+    *read_size += size;
+    if (*read_size >= buffer_size) {
+      buffer_size *= 2;
+
+      if ((buffer = (uint8_t*)realloc(buffer, buffer_size)) == NULL) {
+        printf("can't allocate memory\n");
+        exit(1);
+      }
+    }
+  } while (size == READ_UNIT_SIZE);
+
+  if (*read_size != buffer_size &&
+      (buffer = (uint8_t*)realloc(buffer, *read_size)) == NULL) {
+    printf("can't allocate memory\n");
     exit(1);
   }
-
-  stat(filepath, &st);
-  *file_size = st.st_size;
-
-  buffer = (uint8_t*)malloc(sizeof(uint8_t) * *file_size);
-  fread(buffer, sizeof(uint8_t), *file_size, fp);
-  fclose(fp);
 
   return buffer;
 }
@@ -36,16 +47,18 @@ int main(int argc, const char** argv) {
   uint16_t resolution;
 
   if (argc < 1) {
-    printf("input file is not specified\n");
+    printf("a resolution is not specified\n");
     return 1;
   }
 
   signal(SIGINT, sigint_handler);
-  buffer = read_all(argv[1], &file_size);
-  resolution = ymf825_check_header(buffer);
+  buffer = read_all(&file_size);
+  resolution = atoi(argv[1]);
 
-  printf("file size: %lld\n", file_size);
-  printf("resolution: %d\n", resolution + 1);
+  if (resolution < 1 || resolution > 65536) {
+    printf("resolution '%s' is invalid\n", argv[1]);
+    exit(1);
+  }
 
   ymf825_open();
   ymf825_play(buffer, file_size, resolution);
