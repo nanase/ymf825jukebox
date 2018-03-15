@@ -1,0 +1,17 @@
+{
+  "directory": {
+    "reader": "../ymf825reader/ymf825",
+    "music": "../music/"
+  },
+  "bouncetime": 100,
+  "switch_pins": {
+    "play": 38,
+    "prev": 37,
+    "next": 36,
+    "directory": 35,
+    "power": 33
+  },
+  "led_pins": {
+    "power": 40
+  }
+}
