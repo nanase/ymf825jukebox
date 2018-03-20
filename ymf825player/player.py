@@ -7,7 +7,6 @@ from os import path, listdir
 from collections import namedtuple
 from subprocess import PIPE, Popen
 
-import psutil
 import RPi.GPIO as GPIO
 
 
@@ -51,8 +50,7 @@ class Player:
     if self.playing:
       return
 
-    p = psutil.Process(self.reader_process.pid)
-    p.resume()
+    self.reader_process.send_signal(10)  # SIGUSER1
     print('resume')
     self.playing = True
     
@@ -60,19 +58,22 @@ class Player:
     if self.reader_process is None:
       return
 
-    p = psutil.Process(self.reader_process.pid)
-    p.suspend()
+    self.reader_process.send_signal(10)  # SIGUSER1
     print('suspend')
     self.playing = False
 
   def stop(self):
     if self.reader_process is not None:
-      if not self.playing:
-        p = psutil.Process(self.reader_process.pid)
-        p.resume()
+      self.required_stop = True
       
       self.reader_process.send_signal(2)  # SIGINT
       self.reader_process.wait()
+
+      if self.process_thread is not None:
+        self.process_thread.join()
+        self.process_thread = None
+      
+      self.required_stop = False
       self.playing = False
       self.playing_file = None
       self.reader_process = None
