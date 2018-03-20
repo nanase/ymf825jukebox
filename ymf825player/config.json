@@ -12,6 +12,8 @@
     "power": 33
   },
   "led_pins": {
-    "power": 40
+    "power": 40,
+    "playing": 31,
+    "standby": 32
   }
 }
