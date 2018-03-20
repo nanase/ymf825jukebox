@@ -10,5 +10,6 @@ void ymf825_burst_write(uint8_t, uint8_t, const uint8_t*, size_t);
 void ymf825_close();
 void ymf825_play(const uint8_t*, int64_t, uint16_t);
 void ymf825_stop();
+void ymf825_pause();
 
 void ymf825_reset_hardware();

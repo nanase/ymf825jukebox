@@ -41,6 +41,10 @@ void sigint_handler(int signame) {
   ymf825_stop();
 }
 
+void sigusr1_handler(int signame) {
+  ymf825_pause();
+}
+
 int main(int argc, const char** argv) {
   uint8_t* buffer;
   int64_t  file_size;
@@ -52,6 +56,7 @@ int main(int argc, const char** argv) {
   }
 
   signal(SIGINT, sigint_handler);
+  signal(SIGUSR1, sigusr1_handler);
   buffer = read_all(&file_size);
   resolution = atoi(argv[1]);
 

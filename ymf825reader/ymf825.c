@@ -27,6 +27,7 @@ void ymf825spi_reset_hardware() {
 // ----------------------------------------------------------------
 
 volatile bool request_stop = false;
+volatile bool request_pause = false;
 
 void ymf825_open() {
   spi_open();
@@ -69,10 +70,28 @@ void ymf825_play(const uint8_t* file, int64_t file_size, uint16_t resolution) {
   uint16_t wait_tick;
   int64_t  index = 0x00;
   uint8_t  pin = 0x03;
+  bool     paused = false;
+  uint8_t  i;
 
   delay_initialize(&delay, resolution);
 
   while (!request_stop && index < file_size) {
+    if (request_pause) {
+      if (!paused) {
+        // send note off
+        for (i = 0; i < 16; i++) {
+          ymf825_write(0x03, 0x0b, i);
+          ymf825_write(0x03, 0x0f, i);
+        }
+
+        paused = true;
+      }
+
+      delay_sleep(&delay, 1);
+      continue;
+    }
+
+    paused = false;
     command = file[index++];
 
     switch (command) {
@@ -82,7 +101,6 @@ void ymf825_play(const uint8_t* file, int64_t file_size, uint16_t resolution) {
 
       // Write
       case 0x10:
-        //printf("Write\n");
         ymf825_write(pin, file[index + 0], file[index + 1]);
         index += 2;
         break;
@@ -91,7 +109,6 @@ void ymf825_play(const uint8_t* file, int64_t file_size, uint16_t resolution) {
       // Write and flush short
       case 0x12:
       case 0x14:
-        //printf("Write and flush short\n");
         length = file[index++] * 2;
         ymf825_write_multiple(pin, file + index, length);
         index += length;
@@ -101,7 +118,6 @@ void ymf825_play(const uint8_t* file, int64_t file_size, uint16_t resolution) {
       // Write and flush long
       case 0x13:
       case 0x15:
-        //printf("Write and flush long\n");
         length = (size_t)read_uint16_t(file + index) * 2;
         index += 2;
         ymf825_write_multiple(pin, file + index, length);
@@ -110,7 +126,6 @@ void ymf825_play(const uint8_t* file, int64_t file_size, uint16_t resolution) {
 
       // BurstWrite short
       case 0x20:
-        //printf("BurstWrite short\n");
         address = file[index++];
         length = file[index++];
         ymf825_burst_write(pin, address, file + index, length);
@@ -119,7 +134,6 @@ void ymf825_play(const uint8_t* file, int64_t file_size, uint16_t resolution) {
 
       // BurstWrite long
       case 0x21:
-        //printf("BurstWrite long\n");
         address = file[index++];
         length = (size_t)read_uint16_t(file + index);
         index += 2;
@@ -129,19 +143,16 @@ void ymf825_play(const uint8_t* file, int64_t file_size, uint16_t resolution) {
 
       // Flush
       case 0x80:
-        //printf("Flush\n");
         // do nothing
         break;
 
       // Change Target
       case 0x90:
-        //printf("Change Target\n");
         pin = file[index++];
         break;
 
       // Reset Hardware
       case 0xe0:
-        //printf("Reset Hardware\n");
         ymf825_reset_hardware();
         break;
 
@@ -149,7 +160,6 @@ void ymf825_play(const uint8_t* file, int64_t file_size, uint16_t resolution) {
       // Wait short
       case 0xfc:
       case 0xfe:
-        //printf("Wait short\n");
         wait_tick = file[index++] + 1;
         delay_sleep(&delay, wait_tick);
         break;
@@ -158,7 +168,6 @@ void ymf825_play(const uint8_t* file, int64_t file_size, uint16_t resolution) {
       // Wait long
       case 0xfd:
       case 0xff:
-        //printf("Wait long\n");
         wait_tick = read_uint16_t(file + index) + 1;
         index += 2;
         delay_sleep(&delay, wait_tick);
@@ -177,4 +186,8 @@ void ymf825_play(const uint8_t* file, int64_t file_size, uint16_t resolution) {
 
 void ymf825_stop() {
   request_stop = true;
+}
+
+void ymf825_pause() {
+  request_pause = !request_pause;
 }
