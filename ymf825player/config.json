@@ -5,15 +5,15 @@
   },
   "bouncetime": 100,
   "switch_pins": {
-    "play": 38,
-    "prev": 37,
-    "next": 36,
-    "directory": 35,
-    "power": 33
+    "prev": 8,
+    "play": 10,
+    "next": 12,
+    "directory": 18,
+    "power": 22
   },
   "led_pins": {
-    "power": 40,
-    "playing": 31,
-    "standby": 32
+    "power": 32,
+    "playing": 38,
+    "standby": 16
   }
 }

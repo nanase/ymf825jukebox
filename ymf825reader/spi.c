@@ -3,7 +3,7 @@
 #include <string.h>
 #include "spi.h"
 
-#define IC_PIN RPI_BPLUS_GPIO_J8_22
+#define IC_PIN RPI_BPLUS_GPIO_J8_15
 
 static void spi_initialize() {
   bcm2835_spi_setBitOrder(BCM2835_SPI_BIT_ORDER_MSBFIRST);
