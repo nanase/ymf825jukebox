@@ -11,9 +11,13 @@ import RPi.GPIO as GPIO
 from container import Container
 
 
+def filepath(filename):
+  return path.abspath(path.join(path.dirname(path.abspath(__file__)), filename))
+
+
 class Player:
-  def __init__(self, config='config.json'):
-    with open('config.json') as file:
+  def __init__(self, config=filepath('config.json')):
+    with open(config) as file:
       config = json.load(file, object_hook=lambda d: namedtuple('X', d.keys())(*d.values()))
     
     GPIO.setmode(GPIO.BOARD)
@@ -40,7 +44,7 @@ class Player:
     self.playing = False
     self.playing_file = None
     self.reader_process = None
-    self.base_dir = config.directory.music
+    self.base_dir = filepath(config.directory.music)
     self.file_index = 0
     self.directory_index = 0
     self.process_thread = None
@@ -144,7 +148,7 @@ class Player:
 
       container = Container(self.playing_file)
 
-      self.reader_process = Popen([self.config.directory.reader, str(container.resolution)], stdin=PIPE)
+      self.reader_process = Popen([filepath(self.config.directory.reader), str(container.resolution)], stdin=PIPE)
       self.reader_process.communicate(container.dump)
       self.reader_process.wait()
       self.reader_process = None
