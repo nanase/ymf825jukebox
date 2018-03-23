@@ -30,6 +30,8 @@ class Player:
     GPIO.setup(config.switch_pins.directory, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.setup(config.switch_pins.power, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
+    self.lock = threading.Lock()
+
     GPIO.add_event_detect(config.switch_pins.play, GPIO.FALLING, callback=self.on_play_switch, bouncetime=config.bouncetime)
     GPIO.add_event_detect(config.switch_pins.prev, GPIO.FALLING, callback=self.on_prev_switch, bouncetime=config.bouncetime)
     GPIO.add_event_detect(config.switch_pins.next, GPIO.FALLING, callback=self.on_next_switch, bouncetime=config.bouncetime)
@@ -167,65 +169,69 @@ class Player:
     if self.required_shutdown:
       return
 
-    if self.reader_process is None:
-      self.load()
-      return
+    with self.lock:
+      if self.reader_process is None:
+        self.load()
+        return
 
-    if self.playing:
-      self.pause()
-    else:
-      self.play()
+      if self.playing:
+        self.pause()
+      else:
+        self.play()
   
   def on_prev_switch(self, gpio):
     if self.required_shutdown:
       return
 
-    print('prev')
-    self.stop()
-    self.seek_prev_file()
-    self.load()
+    with self.lock:
+      print('prev')
+      self.stop()
+      self.seek_prev_file()
+      self.load()
 
   def on_next_switch(self, gpio):
     if self.required_shutdown:
       return
 
-    print('next')
-    self.stop()
-    self.seek_next_file()
-    self.load()
+    with self.lock:
+      print('next')
+      self.stop()
+      self.seek_next_file()
+      self.load()
 
   def on_directory_switch(self, gpio):
     if self.required_shutdown:
       return
     
-    print('directory')
-    self.stop()
-    self.seek_next_directory()
-    self.load()
+    with self.lock:
+      print('directory')
+      self.stop()
+      self.seek_next_directory()
+      self.load()
 
   def on_power_switch(self, gpio):
     if self.required_shutdown:
       return
     
-    for _ in range(300):
-      time.sleep(0.01)
+    with self.lock:
+      for _ in range(300):
+        time.sleep(0.01)
+        
+        if GPIO.input(gpio) == GPIO.HIGH:
+          return
+
+      self.required_shutdown = True
+      self.stop()
+      print('shutdown!')
+
+      for _ in range(5):
+        GPIO.output(self.config.led_pins.power, False)
+        time.sleep(0.25)
+        GPIO.output(self.config.led_pins.power, True)
+        time.sleep(0.25)
       
-      if GPIO.input(gpio) == GPIO.HIGH:
-        return
-
-    self.required_shutdown = True
-    self.stop()
-    print('shutdown!')
-
-    for _ in range(5):
-      GPIO.output(self.config.led_pins.power, False)
-      time.sleep(0.25)
-      GPIO.output(self.config.led_pins.power, True)
-      time.sleep(0.25)
-    
-    time.sleep(1)
-    from subprocess import call
-    call("sudo poweroff", shell=True)
+      from subprocess import call
+      call("sudo poweroff", shell=True)
 
 
 def main():
