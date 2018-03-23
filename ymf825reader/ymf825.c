@@ -29,6 +29,14 @@ void ymf825spi_reset_hardware() {
 volatile bool request_stop = false;
 volatile bool request_pause = false;
 
+// for CS LED
+static void dummy_write(uint8_t pin) {
+  int i;
+
+  for (i = 0; i < 50; i++)
+    spi_write(pin, 0x80, 0x00);
+}
+
 void ymf825_open() {
   spi_open();
 }
@@ -40,10 +48,12 @@ void ymf825_write(uint8_t pin, uint8_t address, uint8_t data) {
   }
 
   spi_write(pin, address, data);
+  dummy_write(pin);
 }
 
 void ymf825_write_multiple(uint8_t pin, const uint8_t* address_data, size_t length) {
   spi_write_multiple(pin, address_data, length);
+  dummy_write(pin);
 }
 
 void ymf825_burst_write(uint8_t pin, uint8_t address, const uint8_t* data, size_t length) {
