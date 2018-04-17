@@ -34,10 +34,6 @@ class Player:
     GPIO.add_event_detect(config.switch_pins.next, GPIO.FALLING, callback=self.on_next_switch, bouncetime=config.bouncetime)
     GPIO.add_event_detect(config.switch_pins.directory, GPIO.FALLING, callback=self.on_directory_switch, bouncetime=config.bouncetime)
 
-    GPIO.output(config.led_pins.standby, True)
-    GPIO.output(config.led_pins.playing, False)
-    GPIO.output(config.led_pins.power, True)
-
     self.config = config
     self.playing = False
     self.playing_file = None
@@ -49,13 +45,20 @@ class Player:
     self.required_stop = False
     self.required_shutdown = False
 
+    self.set_led(power=True)
+
   def __enter__(self):
     return self
   
   def __exit__(self, exc_type, exc_value, traceback):
     self.stop()
-    GPIO.output(self.config.led_pins.standby, False)
+    self.set_led(standby=True)
     GPIO.cleanup()
+
+  def set_led(self, standby=False, power=False, playing=False):
+    GPIO.output(self.config.led_pins.standby, not standby)
+    GPIO.output(self.config.led_pins.playing, power)
+    GPIO.output(self.config.led_pins.power, playing)
 
   def play(self):
     if self.playing:
@@ -64,7 +67,7 @@ class Player:
     self.reader_process.send_signal(10)  # SIGUSER1
     print('resume')
     self.playing = True
-    GPIO.output(self.config.led_pins.playing, True)
+    self.set_led(playing=True)
     
   def pause(self):
     if self.reader_process is None:
@@ -73,7 +76,7 @@ class Player:
     self.reader_process.send_signal(10)  # SIGUSER1
     print('suspend')
     self.playing = False
-    GPIO.output(self.config.led_pins.playing, False)
+    self.set_led(power=True)
 
   def stop(self):
     if self.reader_process is not None:
@@ -90,7 +93,7 @@ class Player:
       self.playing = False
       self.playing_file = None
       self.reader_process = None
-      GPIO.output(self.config.led_pins.playing, False)
+      self.set_led(power=True)
 
   def load(self):
     if self.reader_process is not None:
@@ -142,7 +145,7 @@ class Player:
 
       self.playing = True
       self.playing_file = next_playing_file
-      GPIO.output(self.config.led_pins.playing, True)
+      self.set_led(playing=True)
 
       container = Container(self.playing_file)
 
@@ -152,7 +155,7 @@ class Player:
       self.reader_process = None
       self.playing = False
       self.playing_file = None
-      GPIO.output(self.config.led_pins.playing, False)
+      self.set_led(power=True)
 
       if self.required_stop:
         break
