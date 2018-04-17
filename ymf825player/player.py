@@ -25,18 +25,14 @@ class Player:
     GPIO.setup(config.led_pins.playing, GPIO.OUT)
     GPIO.setup(config.led_pins.standby, GPIO.OUT)
     GPIO.setup(config.switch_pins.play, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    GPIO.setup(config.switch_pins.prev, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.setup(config.switch_pins.next, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.setup(config.switch_pins.directory, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    GPIO.setup(config.switch_pins.power, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
     self.lock = threading.Lock()
 
     GPIO.add_event_detect(config.switch_pins.play, GPIO.FALLING, callback=self.on_play_switch, bouncetime=config.bouncetime)
-    GPIO.add_event_detect(config.switch_pins.prev, GPIO.FALLING, callback=self.on_prev_switch, bouncetime=config.bouncetime)
     GPIO.add_event_detect(config.switch_pins.next, GPIO.FALLING, callback=self.on_next_switch, bouncetime=config.bouncetime)
     GPIO.add_event_detect(config.switch_pins.directory, GPIO.FALLING, callback=self.on_directory_switch, bouncetime=config.bouncetime)
-    GPIO.add_event_detect(config.switch_pins.power, GPIO.FALLING, callback=self.on_power_switch, bouncetime=config.bouncetime)
 
     GPIO.output(config.led_pins.standby, True)
     GPIO.output(config.led_pins.playing, False)
