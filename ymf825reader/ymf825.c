@@ -73,7 +73,7 @@ void ymf825_play(const uint8_t* file, int64_t file_size, uint16_t resolution) {
   bool     paused = false;
   uint8_t  i;
 
-  delay_initialize(&delay, resolution);
+  delay_initialize(&delay, resolution, &pwm_decrement);
 
   while (!request_stop && index < file_size) {
     if (request_pause) {

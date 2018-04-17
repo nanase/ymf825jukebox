@@ -12,3 +12,6 @@ void spi_write_multiple(uint8_t, const uint8_t*, size_t);
 void spi_burst_write(uint8_t, uint8_t, const uint8_t*, size_t);
 void spi_set_ic(bool);
 void spi_close();
+
+void pwm_increment(uint8_t pin);
+void pwm_decrement();

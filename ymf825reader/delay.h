@@ -10,5 +10,5 @@ typedef struct {
   uint64_t tick_unit;
 } Delay;
 
-void delay_initialize(Delay*, uint16_t);
+void delay_initialize(Delay*, uint16_t, void (*action)());
 void delay_sleep(Delay*, uint32_t);
